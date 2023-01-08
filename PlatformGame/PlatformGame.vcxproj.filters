@@ -20,8 +20,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="C:\Users\enoxy\OneDrive\Рабочий стол\Nikita.png">
-      <Filter>Файлы ресурсов</Filter>
-    </Image>
+    <ClInclude Include="Map.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

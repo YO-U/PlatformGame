@@ -1,4 +1,5 @@
 ﻿#include <SFML/Graphics.hpp>
+#include "Map.h"
 
 using namespace sf;
 
@@ -52,6 +53,13 @@ int main()
 {
 	sf::RenderWindow window(sf::VideoMode(640, 480), "Test!");
 
+	Image map_image;
+	map_image.loadFromFile("images/map.png");
+	Texture map;
+	map.loadFromImage(map_image);
+	Sprite s_map;
+	s_map.setTexture(map);
+
 	Player p("hero.png", 250, 250, 96.0, 96.0);
 
 	float CurrentFrame = 0;
@@ -101,6 +109,20 @@ int main()
 		p.update(time);
 
 		window.clear();
+
+		for (int i = 0; i < HEIGHT_MAP; i++)
+		{
+			for (int j = 0; j < WIDTH_MAP; j++)
+			{
+				if (TileMap[i][j] == ' ')  s_map.setTextureRect(IntRect(0, 0, 32, 32));
+				if (TileMap[i][j] == 's')  s_map.setTextureRect(IntRect(32, 0, 32, 32));
+				if (TileMap[i][j] == '0')  s_map.setTextureRect(IntRect(64, 0, 32, 32));
+
+				s_map.setPosition(j * 32, i * 32);
+				window.draw(s_map);
+			}
+		}
+
 		window.draw(p.sprite);
 		window.display();
 	}
