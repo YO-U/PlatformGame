@@ -1,5 +1,6 @@
 ﻿#include <SFML/Graphics.hpp>
 #include "Map.h"
+#include "View.h"
 
 using namespace sf;
 
@@ -47,11 +48,18 @@ public: float x, y, w, h, dx, dy, speed = 0;
 		  speed = 0;
 		  sprite.setPosition(x, y);
 	  }
+	  float GetPlayerCoordinateX() {
+		  return x;
+	  }
+	  float GetGlayerCoordinateY() {
+		  return y;
+	  }
 };
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(640, 480), "Test!");
+	RenderWindow window(VideoMode(640, 480), "Test!");
+	view.reset(FloatRect(0, 0, 640, 480));
 
 	Image map_image;
 	map_image.loadFromFile("images/map.png");
@@ -70,10 +78,10 @@ int main()
 		float time = clock.getElapsedTime().asMicroseconds();
 		clock.restart();
 		time = time / 800;
-		sf::Event event;
+		Event event;
 		while (window.pollEvent(event))
 		{
-			if (event.type == sf::Event::Closed)
+			if (event.type == Event::Closed)
 				window.close();
 		}
 		if (Keyboard::isKeyPressed(Keyboard::A)) {
@@ -82,7 +90,7 @@ int main()
 			CurrentFrame += 0.005 * time; 
 			if (CurrentFrame > 3) CurrentFrame -= 3;
 			p.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 96, 96, 96));
-
+			GetPlayerCoordinateForView(p.GetPlayerCoordinateX(), p.GetGlayerCoordinateY());
 		}
 		if (Keyboard::isKeyPressed(Keyboard::D)) {
 			p.dir = 0;
@@ -90,6 +98,7 @@ int main()
 			CurrentFrame += 0.005 * time;
 			if (CurrentFrame > 3) CurrentFrame -= 3;
 			p.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 192, 96, 96));
+			GetPlayerCoordinateForView(p.GetPlayerCoordinateX(), p.GetGlayerCoordinateY());
 		}
 		if (Keyboard::isKeyPressed(Keyboard::W)) {
 			p.dir = 3;
@@ -97,6 +106,7 @@ int main()
 			CurrentFrame += 0.005 * time;
 			if (CurrentFrame > 3) CurrentFrame -= 3;
 			p.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 288, 96, 96));
+			GetPlayerCoordinateForView(p.GetPlayerCoordinateX(), p.GetGlayerCoordinateY());
 		}
 		if (Keyboard::isKeyPressed(Keyboard::S)) { 
 			p.dir = 2;
@@ -104,10 +114,13 @@ int main()
 			CurrentFrame += 0.005 * time;
 			if (CurrentFrame > 3) CurrentFrame -= 3;
 			p.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 0, 96, 96));
+			GetPlayerCoordinateForView(p.GetPlayerCoordinateX(), p.GetGlayerCoordinateY());
 		}
 
 		p.update(time);
+		//ViewMap(time);//двигать камерой отдельно от персонажа
 
+		window.setView(view);
 		window.clear();
 
 		for (int i = 0; i < HEIGHT_MAP; i++)
