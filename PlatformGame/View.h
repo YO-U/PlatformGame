@@ -4,11 +4,15 @@ using namespace sf;
 View view;
 
 View GetPlayerCoordinateForView(float x, float y) {
-	view.setCenter(x + 100, y);
+	float tempX = x, tempY = y;
+	if (x < 320) tempX = 320;
+	if (y < 240) tempY = 240;
+	if (y > 554)tempY = 554;
+	view.setCenter(tempX, tempY);
 	return view;
 }
 
-//двигать камерой отдельно от персонажа
+//move camera without hero
 /*
 View ViewMap(float time) {
 	if (Keyboard::isKeyPressed(Keyboard::A)) {
@@ -27,7 +31,7 @@ View ViewMap(float time) {
 }
 */
 
-//Разные движения камерой 
+//more move camera
 /*
 void changeview() {
 

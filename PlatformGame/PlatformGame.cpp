@@ -1,22 +1,26 @@
 ﻿#include <SFML/Graphics.hpp>
 #include "Map.h"
 #include "View.h"
+#include <iostream>
+#include <sstream>
 
 using namespace sf;
 
 class Player {
 public: float x, y, w, h, dx, dy, speed = 0;
-	  int dir = 0;
+	  int dir,score;
 	  String File;
 	  Image image;
 	  Texture texture;
 	  Sprite sprite;
 	  Player(String F, int X, int Y, float W, float H) {
+		  dir = 0;
+		  score = 0;
 		  File = F;
 		  w = W;
 		  h = H;
 		  image.loadFromFile("Images/" + File);
-		  image.createMaskFromColor(Color(41, 33, 59));
+		  //image.createMaskFromColor(Color(41, 33, 59));//del color on img
 		  texture.loadFromImage(image);
 		  sprite.setTexture(texture);
 		  x = X;
@@ -47,12 +51,47 @@ public: float x, y, w, h, dx, dy, speed = 0;
 		  y += dy * time;
 		  speed = 0;
 		  sprite.setPosition(x, y);
+		  InteractionMap();
 	  }
 	  float GetPlayerCoordinateX() {
 		  return x;
 	  }
 	  float GetGlayerCoordinateY() {
 		  return y;
+	  }
+	  void InteractionMap() {
+		  for (int i = y/32; i < (h+y)/32; i++)
+		  {
+			  for (int j = x/32; j < (x+w)/32; j++)
+			  {
+				  if (TileMap[i][j] == '0')//cant go after 0 in map
+				  {
+					  if (dy>0)
+					  {
+						  y = i * 32 - h;
+					  }
+					  if (dy<0)
+					  {
+						  y = i * 32 + 32;
+					  }
+					  if (dx>0)
+					  {
+						  x = j * 32 - w;
+					  }
+					  if (dx<0)
+					  {
+						  x = j * 32 + 32;
+					  }
+				  }
+				  if (TileMap[i][j]=='s') // use s(stoun)
+				  {
+					  //x = 300;//teleport
+					  //y = 300;
+					  score++;
+					  TileMap[i][j] = ' ';//clear s
+				  }
+			  }
+		  }
 	  }
 };
 
@@ -61,18 +100,24 @@ int main()
 	RenderWindow window(VideoMode(640, 480), "Test!");
 	view.reset(FloatRect(0, 0, 640, 480));
 
+	Font font;
+	font.loadFromFile("CyrilicOld.ttf");
+	Text text("", font, 20);
+	text.setOutlineColor(Color::White);
+	text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+
 	Image map_image;
-	map_image.loadFromFile("images/map.png");
+	map_image.loadFromFile("Images/map.png");
 	Texture map;
 	map.loadFromImage(map_image);
 	Sprite s_map;
 	s_map.setTexture(map);
 
-	Player p("hero.png", 250, 250, 96.0, 96.0);
+	Player p("Test.png", 160, 160, 40, 60);
 
 	float CurrentFrame = 0;
 	Clock clock;
-	 
+	int step = 10;
 	while (window.isOpen())
 	{
 		float time = clock.getElapsedTime().asMicroseconds();
@@ -84,42 +129,46 @@ int main()
 			if (event.type == Event::Closed)
 				window.close();
 		}
+		
 		if (Keyboard::isKeyPressed(Keyboard::A)) {
 			p.dir = 1;
 			p.speed = 0.1;
+			if (CurrentFrame > 0) { step = 30; }
+			else step = 10;
 			CurrentFrame += 0.005 * time; 
-			if (CurrentFrame > 3) CurrentFrame -= 3;
-			p.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 96, 96, 96));
+			if (CurrentFrame > 4) CurrentFrame -= 4;
+			p.sprite.setTextureRect(IntRect(50 *int(CurrentFrame)+step, 133, -40, 60));
 			GetPlayerCoordinateForView(p.GetPlayerCoordinateX(), p.GetGlayerCoordinateY());
 		}
 		if (Keyboard::isKeyPressed(Keyboard::D)) {
 			p.dir = 0;
-			p.speed = 0.1;
+			p.speed = 0.1; 
+			if (CurrentFrame > 0) { step = 30; }else step = 10;
 			CurrentFrame += 0.005 * time;
 			if (CurrentFrame > 3) CurrentFrame -= 3;
-			p.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 192, 96, 96));
+			p.sprite.setTextureRect(IntRect(50 * int(CurrentFrame)+step, 133, 40, 60));
 			GetPlayerCoordinateForView(p.GetPlayerCoordinateX(), p.GetGlayerCoordinateY());
 		}
-		if (Keyboard::isKeyPressed(Keyboard::W)) {
+		/*if (Keyboard::isKeyPressed(Keyboard::W)) {
 			p.dir = 3;
 			p.speed = 0.1;
 			CurrentFrame += 0.005 * time;
 			if (CurrentFrame > 3) CurrentFrame -= 3;
-			p.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 288, 96, 96));
+			p.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 307, 96, 96));
 			GetPlayerCoordinateForView(p.GetPlayerCoordinateX(), p.GetGlayerCoordinateY());
-		}
-		if (Keyboard::isKeyPressed(Keyboard::S)) { 
+		}*/
+		/*if (Keyboard::isKeyPressed(Keyboard::S)) { 
 			p.dir = 2;
 			p.speed = 0.1;
 			CurrentFrame += 0.005 * time;
 			if (CurrentFrame > 3) CurrentFrame -= 3;
 			p.sprite.setTextureRect(IntRect(96 * int(CurrentFrame), 0, 96, 96));
 			GetPlayerCoordinateForView(p.GetPlayerCoordinateX(), p.GetGlayerCoordinateY());
-		}
+		}*/
 
 		p.update(time);
-		//ViewMap(time);//двигать камерой отдельно от персонажа
-
+		//ViewMap(time);//move camera without hero
+		//changeview();//more move camera 
 		window.setView(view);
 		window.clear();
 
@@ -135,8 +184,12 @@ int main()
 				window.draw(s_map);
 			}
 		}
-
+		std::ostringstream ScoreString;
+		ScoreString << p.score;
+		text.setString("Собрано камней: "+ ScoreString.str()); 
+		text.setPosition(view.getCenter().x-265, view.getCenter().y-200);
 		window.draw(p.sprite);
+		window.draw(text);
 		window.display();
 	}
 	return 0;
